@@ -1,2 +1,15 @@
 streamlit
 openai
+google-generativeai
+gender-guesser==0.4.0
+matplotlib
+numpy==1.23.5
+pandas
+xmltodict
+urllib3
+seaborn>=0.11.0
+streamlit-lottie
+plotly
+streamlit-extras>=0.2.4
+streamlit-extras
+emoji-country-flag
