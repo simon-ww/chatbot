@@ -3,6 +3,9 @@ import pandas as pd
 import openai
 import numpy as np
 from flag import flag
+import plotly.express as px
+import pycountry
+import json
 
 # Set up OpenAI API key
 openai.api_key = st.secrets["secrets"]["OPENAI_API_KEY"]
@@ -25,6 +28,13 @@ def calculate_similarity(user_scores, country_scores):
     country_vector = np.array([country_scores[trait] for trait in user_scores.keys()])
     distance = np.linalg.norm(user_vector - country_vector)  # Euclidean distance
     return distance
+
+def alpha2_to_alpha3(alpha2):
+    """Convert Alpha-2 country code to Alpha-3."""
+    try:
+        return pycountry.countries.get(alpha_2=alpha2).alpha_3
+    except AttributeError:
+        return None
 
 def get_flag_emoji(country_code):
     """Get the country flag emoji using the `flag` package."""
@@ -61,11 +71,49 @@ def render_country_table(df, title):
             f"<tr>"
             f"<td>{row['country']}</td>"
             f"<td>{row['similarity']:.2f}</td>"
-            f"<td>{get_flag_emoji(row['country'])}</td>"
+            f"<td>{get_flag_emoji(row['country_code'])}</td>"
             f"</tr>"
         )
     table_html += "</table>"
     st.markdown(table_html, unsafe_allow_html=True)
+
+def render_similarity_map(similarity_df):
+    """Render a choropleth map based on similarity scores."""
+    st.subheader("Global Similarity Map")
+
+    # Load GeoJSON file
+    with open("data/world.geo.json", "r") as geojson_file:
+        geojson_data = json.load(geojson_file)
+
+    # Convert Alpha-2 to Alpha-3 codes
+    similarity_df['country_code_alpha_3'] = similarity_df['country_code'].apply(alpha2_to_alpha3)
+
+    map_data = similarity_df.rename(columns={"country_code_alpha_3": "iso_alpha", "similarity": "Similarity"})
+
+    fig = px.choropleth(
+        map_data,
+        geojson=geojson_data,
+        locations="iso_alpha",
+        color="Similarity",
+        hover_name="country",
+        hover_data=["Similarity"],
+        color_continuous_scale="Viridis",
+        title="Similarity of Countries Based on Big Five Traits"
+    )
+    fig.update_geos(
+        showcoastlines=True,
+        coastlinecolor="LightGray",
+        showland=True,
+        landcolor="whitesmoke",
+        fitbounds="locations"
+    )
+    fig.update_layout(
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        coloraxis_colorbar={
+            "title": "Similarity",
+        }
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 def compare_with_dataset(scores, dataset_path):
     """Compare user scores with a dataset of Big Five test results."""
@@ -81,21 +129,21 @@ def compare_with_dataset(scores, dataset_path):
 
         # Check if the required columns exist
         t_score_columns = ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"]
-        if not all(col in df.columns for col in t_score_columns + ["country"]):
-            raise ValueError("Dataset is missing required columns, including 'country'.")
+        if not all(col in df.columns for col in t_score_columns + ["country", "country_code"]):
+            raise ValueError("Dataset is missing required columns, including 'country' and 'country_code'.")
 
         # Drop rows with missing values in Big Five columns
         df = df.dropna(subset=t_score_columns)
 
-        # Ensure the `country` column contains valid country codes
-        if "country" in df.columns:
-            df["country"] = df["country"].apply(lambda x: str(x).strip().upper() if isinstance(x, str) else "UNKNOWN")
+        # Ensure the `country_code` column contains valid country codes
+        if "country_code" in df.columns:
+            df["country_code"] = df["country_code"].apply(lambda x: str(x).strip().upper() if isinstance(x, str) else "UNKNOWN")
         else:
-            raise ValueError("Dataset is missing the 'country' column.")
+            raise ValueError("Dataset is missing the 'country_code' column.")
 
         # Extract relevant Big Five columns and rescale them
         df_rescaled = df[t_score_columns].apply(rescale_t_scores_to_one_five)
-        df_rescaled = pd.concat([df_rescaled, df["country"].reset_index(drop=True)], axis=1)  # Add the country column
+        df_rescaled = pd.concat([df_rescaled, df[["country", "country_code"]].reset_index(drop=True)], axis=1)  # Add country and country_code columns
 
         # Convert user scores to lowercase keys for comparison
         scores = {k.lower(): v for k, v in scores.items()}
@@ -105,14 +153,14 @@ def compare_with_dataset(scores, dataset_path):
         for _, row in df_rescaled.iterrows():
             country_scores = row[t_score_columns].to_dict()
             similarity = calculate_similarity(scores, country_scores)
-            similarities.append({"country": row["country"], "similarity": similarity})
+            similarities.append({"country": row["country"], "country_code": row["country_code"], "similarity": similarity})
 
         # Convert to DataFrame and sort by similarity
         similarity_df = pd.DataFrame(similarities)
         similarity_df = similarity_df.sort_values(by="similarity", ascending=True)  # Lower distance = more similar
 
-        # Add emoji flags
-        similarity_df["flag"] = similarity_df["country"].apply(lambda x: get_flag_emoji(str(x).upper()))
+        # Create the map visualization
+        render_similarity_map(similarity_df)
 
         # Top 5 most similar countries
         most_similar = similarity_df.head(5)
