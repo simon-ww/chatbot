@@ -6,9 +6,12 @@ from flag import flag
 import plotly.express as px
 import pycountry
 import json
+from questions import questions
 
 # Set up OpenAI API key
 openai.api_key = st.secrets["secrets"]["OPENAI_API_KEY"]
+
+st.set_page_config(page_title="Big Five", layout="wide")
 
 def calculate_big_five_scores(responses):
     """Calculate Big Five scores based on user responses."""
@@ -81,8 +84,8 @@ def render_similarity_map(similarity_df):
     """Render a choropleth map based on similarity scores."""
     st.subheader("Global Similarity Map")
 
-    # Load GeoJSON file
-    with open("data/world.geo.json", "r") as geojson_file:
+    # Load GeoJSON file 
+    with open("countries.geo.json", "r") as geojson_file:
         geojson_data = json.load(geojson_file)
 
     # Convert Alpha-2 to Alpha-3 codes
@@ -102,21 +105,29 @@ def render_similarity_map(similarity_df):
     )
     fig.update_geos(
         showcoastlines=True,
-        coastlinecolor="LightGray",
+        coastlinecolor="gray",  # Coastline color for contrast
         showland=True,
-        landcolor="whitesmoke",
+        landcolor="black",  # Land color
+        showocean=True,
+        oceancolor="black",  # Ocean color
         fitbounds="locations"
     )
     fig.update_layout(
-        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        autosize=False,
+        paper_bgcolor="black",  # Background color
+        plot_bgcolor="black",  # Plot area background color
+        font_color="white",  # Font color for text
+        margin=dict(l=20, r=20, t=50, b=20),
         coloraxis_colorbar={
             "title": "Similarity",
+            "tickfont": {"color": "white"},  # Tick font color
+            "titlefont": {"color": "white"}  # Title font color
         }
     )
     st.plotly_chart(fig, use_container_width=True)
 
+# Inside compare_with_dataset function
 def compare_with_dataset(scores, dataset_path):
-    """Compare user scores with a dataset of Big Five test results."""
     try:
         # Load the dataset
         df = pd.read_csv(dataset_path)
@@ -162,13 +173,15 @@ def compare_with_dataset(scores, dataset_path):
         # Create the map visualization
         render_similarity_map(similarity_df)
 
-        # Top 5 most similar countries
-        most_similar = similarity_df.head(5)
-        render_country_table(most_similar, "Top 5 Most Similar Countries")
+        # Create a centered container for tables
+        with st.container():
+            col1, col2 = st.columns((0.1, 0.1))
 
-        # Top 5 least similar countries
-        least_similar = similarity_df.tail(5)
-        render_country_table(least_similar, "Top 5 Least Similar Countries")
+            with col1:
+                render_country_table(similarity_df.head(5), "Top 5 Most Similar Countries")
+
+            with col2:
+                render_country_table(similarity_df.tail(5), "Top 5 Least Similar Countries")
 
     except FileNotFoundError:
         st.error(f"Dataset not found at {dataset_path}. Please upload the correct file.")
@@ -181,101 +194,73 @@ def compare_with_dataset(scores, dataset_path):
 def main():
     st.title("Big Five Personality Test & Negotiation Advisor")
 
+    # Initialize session state variables
+    if "test_submitted" not in st.session_state:
+        st.session_state.test_submitted = False
+    if "advice_generated" not in st.session_state:
+        st.session_state.advice_generated = False
+
     # Step 1: Big Five Questionnaire
-    st.header("Step 1: Take the Personality Test")
-    
-    # Define Big Five questions (10 for each trait for better granularity)
-    questions = {
-        "Openness": [
-            "I have a vivid imagination.",
-            "I am interested in abstract ideas.",
-            "I enjoy artistic and creative experiences.",
-            "I value aesthetic and artistic qualities.",
-            "I prefer variety to routine.",
-            "I enjoy philosophical discussions.",
-            "I am open to trying new activities.",
-            "I enjoy thinking about complex concepts.",
-            "I am curious about many different things.",
-            "I have an active imagination."
-        ],
-        "Conscientiousness": [
-            "I like to plan ahead.",
-            "I pay attention to details.",
-            "I complete tasks on time.",
-            "I am highly organized.",
-            "I follow through with commitments.",
-            "I set and stick to goals.",
-            "I am self-disciplined.",
-            "I strive for excellence in everything I do.",
-            "I keep my workspace clean and orderly.",
-            "I work hard to achieve my ambitions."
-        ],
-        "Extraversion": [
-            "I feel comfortable around people.",
-            "I start conversations easily.",
-            "I am outgoing and sociable.",
-            "I enjoy being the center of attention.",
-            "I make friends easily.",
-            "I enjoy social gatherings.",
-            "I find it easy to express my opinions.",
-            "I am energized by interacting with others.",
-            "I feel at ease in large crowds.",
-            "I like to meet new people."
-        ],
-        "Agreeableness": [
-            "I am considerate of others' feelings.",
-            "I sympathize with others' problems.",
-            "I enjoy helping others.",
-            "I am trusting of others.",
-            "I avoid conflict whenever possible.",
-            "I am generous with my time and resources.",
-            "I am quick to forgive others.",
-            "I work well with others in a team.",
-            "I value harmony in relationships.",
-            "I care deeply about the well-being of others."
-        ],
-        "Neuroticism": [
-            "I often feel anxious or stressed.",
-            "I get upset easily.",
-            "I am sensitive to criticism.",
-            "I frequently worry about things.",
-            "I have mood swings.",
-            "I find it hard to cope with stress.",
-            "I feel insecure in unfamiliar situations.",
-            "I am easily discouraged.",
-            "I often feel overwhelmed.",
-            "I tend to focus on my shortcomings."
-        ]
-    }
+    with st.expander("Step 1: Take the Personality Test", expanded=True):
+        responses = {}
 
-    responses = {}
+        # Display questions with sliders grouped by trait
+        for trait, trait_questions in questions.items():
+            st.subheader(trait)
+            st.caption("Rate on a scale of 1 (Strongly Disagree) to 5 (Strongly Agree).")
+            responses[trait] = []
+            for question in trait_questions:
+                response = st.slider(question, 1, 5, 3, key=f"{trait}_{question}")
+                responses[trait].append(response)
 
-    # Display questions with sliders grouped by trait
-    for trait, trait_questions in questions.items():
-        st.subheader(trait)
-        responses[trait] = []
-        for question in trait_questions:
-            response = st.slider(question, 1, 5, 3, key=f"{trait}_{question}")
-            responses[trait].append(response)
+        # Step 1 Button: Submit Test
+        if st.button("Submit Test"):
+            st.session_state.test_submitted = True
+            st.session_state.advice_generated = False  # Reset advice state when test is resubmitted
 
-    if st.button("Submit Test"):
+    if st.session_state.test_submitted:
         # Flatten responses for scoring
         flattened_responses = [response for trait_responses in responses.values() for response in trait_responses]
-        
+
         # Step 2: Calculate Scores
         scores = calculate_big_five_scores(flattened_responses)
         st.subheader("Your Personality Profile")
-        for trait, score in scores.items():
-            st.write(f"{trait}: {score:.2f}")
+
+        # Create a bar graph with distinct colors for each bar
+        traits = list(scores.keys())
+        values = list(scores.values())
+        colors = ["#C2185B", "#7C4DFF", "#536DFE", "#00BCD4", "#64FFDA"]  # Example color palette
+
+        fig = px.bar(
+            x=traits,
+            y=values,
+            labels={"x": "Traits", "y": "Score"},
+            title="Your Big Five Personality Profile",
+            color=traits,  # Add a color dimension
+            color_discrete_sequence=colors  # Assign custom colors
+        )
+
+        fig.update_layout(
+            xaxis_title="Traits",
+            yaxis_title="Score",
+            plot_bgcolor="#0e1117",
+            paper_bgcolor="#0e1117",
+            font_color="white"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
 
         # Step 3: Compare with Dataset
         st.header("Step 2: Country Similarities")
-        dataset_path = "/workspaces/chatbot/data/Ecology and Culture Cultural Variables.csv"  # Replace with your actual dataset path
+        dataset_path = "/workspaces/chatbot/data/global_bigfive_data.csv"  # Replace with your actual dataset path
         compare_with_dataset(scores, dataset_path)
 
         # Step 4: Get Negotiation Advice
         st.header("Step 3: Personalized Negotiation Advice")
         if st.button("Generate Advice"):
+            st.session_state.advice_generated = True
+
+        if st.session_state.advice_generated:
             advice = get_negotiation_advice(scores)
             st.write(advice)
 
