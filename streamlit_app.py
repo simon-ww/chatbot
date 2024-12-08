@@ -248,7 +248,8 @@ def main():
             font_color="white"
         )
         st.plotly_chart(fig, use_container_width=True)
-
+        extraversion_score = scores["Extraversion"]
+        st.markdown(f"**You scored {extraversion_score:.2f} on the Extraversion scale.**")
 
         # Step 3: Compare with Dataset
         st.header("Step 2: Country Similarities")
