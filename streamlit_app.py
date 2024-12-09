@@ -406,7 +406,7 @@ def main():
 
         # Step 3: Compare with Dataset
         st.markdown("<h2 style='text-align: center;'>How your Traits Translate", unsafe_allow_html=True)
-        dataset_path = "/workspaces/chatbot/data/global_bigfive_data.csv"  # Replace with your actual dataset path
+        dataset_path = "data/global_bigfive_data.csv"  # Replace with your actual dataset path
         compare_with_dataset(scores, dataset_path)
 
     with st.expander("Find Tactics & Strategies to match your Personality & Context", expanded=False):

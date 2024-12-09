@@ -1,6 +1,5 @@
 streamlit
 openai==0.28
-google-generativeai
 gender-guesser==0.4.0
 matplotlib
 numpy==1.23.5
