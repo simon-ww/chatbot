@@ -16,4 +16,3 @@ emoji-country-flag
 st_pages
 pycountry
 streamlit_extras
-json
