@@ -279,8 +279,8 @@ def generate_disimilar(similarity_df):
 #################### Streamlit App ######################
 #########################################################
 def main():
-    st.markdown("<h1 style='text-align: center;'>🥧 The Pie's not always Apple</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>Want to take your newly minted negotiations skills global?</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;; color: #E7AB79;'>🥧 The Pie's not Always <em>Apple</em></h1>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; font-size: 18px;'>Want to take your newly minted negotiations skills global?</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center;'>Try this tool to understand how your personality helps (or hurts) in cross-culture negotiations.</p>", unsafe_allow_html=True)
     st.markdown(
              """ 
@@ -288,39 +288,59 @@ def main():
              To excel as a negotiator, especially in an increasingly globalized world, one must embrace the diversity of cultural norms and personality traits. As Erin Meyer highlights in <em>Getting to Sí, Ja, Oui, Hai, and Da</em> what drives a deal forward in one culture can derail it in another​. For instance, while open disagreement is seen as a constructive dialogue in cultures like Germany or Israel, it may shut down discussions in Mexico or Japan. Similarly, building trust may involve professional competency in the U.S. but require deep personal relationships in China​. 
              
              Understanding and adapting to these nuances enables negotiators to decode subtle signals and avoid miscommunication. Whether it’s gauging emotional expressiveness, tailoring communication to the right level of formality, or recognizing when “yes” means “maybe,” being culturally attuned is essential to fostering trust and mutual understanding​. By broadening your perspective and honing your cultural intelligence, you pave the way for more successful outcomes and lasting partnerships.
-             
-             This tool leverages data analytics and a CustomGPT to dynamically provide you personality results, contextualized against how they align with that of generalized results from other countries. 
              </div>
              """, unsafe_allow_html=True)
-
+    st.markdown("<h4 style='text-align: center; font-size: 18px;'>What you'll get out of Culture Pie</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>This tool leverages data analytics and a CustomGPT to dynamically provide you personality results, contextualized against how they align with that of generalized results from other countries.</p>", unsafe_allow_html=True) 
+    st.markdown("<h4 style='text-align: center; font-size: 18px;'>The Features:</h4>", unsafe_allow_html=True)
+    st.markdown(
+             """ 
+             <div style='text-align: center;'>
+                <ul style="list-style-position: inside;">
+                    <li>Built in Big Five Traits test to provide you scores across the core personality traits</li>
+                    <li>CustomGPT AI tech to provide you customized advice on how your traits may influence your negotiation style</li>
+                    <li>Data insights from a global study of 56 nations (N=17k+) to provide country-level insights</li>
+                    <li>Leverage Euclidean distance calculation to index your Big 5 Traits across countries - providing you insight which countries you're most and least similar to in Big Five scores</li>
+                    <li>Provides CustomGPT AI generated insights on negotiation and communication styles for the countries you're least and most similar to</li>
+                    <li>Drill-in informational references on personality traits and negotiation tactics for your use</li>
+             </div>
+             """, unsafe_allow_html=True)
     # Render the sidebar and get the user's navigation choice
     with st.sidebar:
-        st.title("🥧 Culture Pie")
+        st.markdown('<span style="font-size: 50px;">🥧</span>', unsafe_allow_html=True)
+        st.title("**Culture Pie**")
         st.subheader("Negotiations - Fall 2024")
+        st.markdown("<p style='text-align: center;'>Simon Chen WG'26 <a href='simoncn@wharton.upenn.edu' target='_blank'>simoncn@wharton.upenn.edu</a>.</p>",unsafe_allow_html=True)        
         st.markdown(
-            """Culture pie is a tool built for exploring the nusances created by the intersection of personality and culture when people of different backgrounds come to the table to negotiate."""
-        )
-        st.markdown("<p style='text-align: center;'>Simon Chen WG'26 <a href='simoncn@wharton.upenn.edu' target='_blank'>simoncn@wharton.upenn.edu</a>.</p>",unsafe_allow_html=True)
-        st.subheader("Works Cited")
-        st.markdown("""
-        - [IPIP, Big Five Personality Test](https://ipip.ori.org/)
-        - [Meyer, Erin. “Getting to Sí, Ja, Oui, Hai, and Da.” Harvard Business Review, Dec. 2015](https://hbr.org/2015/12/getting-to-si-ja-oui-hai-and-da)
-        - Fisher, Roger, and William Ury. Getting to Yes: Negotiating Agreement Without Giving In
-        """)
-        st.subheader("Data Set")
-        st.markdown("""
-        - [The EcoCultural Dataset, OSF](https://osf.io/r9msf/)
-        """)
-        st.markdown(
-            """["The Geographic Distribution of Big Five Personality Traits"](https://www.researchgate.net/publication/260244540_The_Geographic_Distribution_of_Big_Five_Personality_Traits_Patterns_and_Profiles_of_Human_Self-Description_Across_56_Nations) is part of the International Sexuality Description Project (ISDP) and collected data on the Big Five personality traits using the 44-item Big Five Inventory (BFI). The data set spans responses from 17,837 participants across 56 nations, representing 10 geographic world regions, 29 languages, and six continents. Most samples were composed of college students, with some community-based participants, and were convenience samples."""
-        )
-        st.markdown("""
-        Key features of the data collection:
-        - Translations: The BFI was translated into 28 languages using translation and back-translation methods to ensure cultural and linguistic appropriateness.
-        - Sampling: Participants were mainly volunteers, with some receiving incentives or course credit.
-        - Methodology: The study utilized self-reported measures with a high return rate among college students (~95%) but lower among community samples (~50%).
+            """ℹ️ Culture pie is a tool built for exploring the nusances created by the intersection of personality and culture when people of different backgrounds come to the table to negotiate."""
+        )    
+        with st.expander("**About the Course**", expanded=True):
+            st.markdown("""
+            This app was built as a final project for [MGMT/OIDD/LGST 8060](https://apps.wharton.upenn.edu/syllabi/?term=202430&course=LGST8060402) at Wharton, taught by Professor Gus Cooney. 
+            """)
+            st.image("wharton_logo.png", caption=None, width=150)
+        with st.expander("**Works Cited**", expanded=True):
+            st.subheader("**📚 Works Cited**")
+            st.markdown("""
+            - [IPIP, Big Five Personality Test](https://ipip.ori.org/)
+            - [Meyer, Erin. “Getting to Sí, Ja, Oui, Hai, and Da.” Harvard Business Review, Dec. 2015](https://hbr.org/2015/12/getting-to-si-ja-oui-hai-and-da)
+            - Fisher, Roger, and William Ury. Getting to Yes: Negotiating Agreement Without Giving In
+            """)
+        with st.expander("**About the Data Set**", expanded=True):
+            st.subheader("**📊 Data Set**")
+            st.markdown("""
+            - [The EcoCultural Dataset, OSF](https://osf.io/r9msf/)
+            """)
+            st.markdown(
+                """["The Geographic Distribution of Big Five Personality Traits"](https://www.researchgate.net/publication/260244540_The_Geographic_Distribution_of_Big_Five_Personality_Traits_Patterns_and_Profiles_of_Human_Self-Description_Across_56_Nations) is part of the International Sexuality Description Project (ISDP) and collected data on the Big Five personality traits using the 44-item Big Five Inventory (BFI). The data set spans responses from 17,837 participants across 56 nations, representing 10 geographic world regions, 29 languages, and six continents. Most samples were composed of college students, with some community-based participants, and were convenience samples."""
+            )
+            st.markdown("""
+            Key features of the data collection:
+            - Translations: The BFI was translated into 28 languages using translation and back-translation methods to ensure cultural and linguistic appropriateness.
+            - Sampling: Participants were mainly volunteers, with some receiving incentives or course credit.
+            - Methodology: The study utilized self-reported measures with a high return rate among college students (~95%) but lower among community samples (~50%).
 
-        """)
+            """)
 
     # Initialize session state variables
     if "test_submitted" not in st.session_state:
