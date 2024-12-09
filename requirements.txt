@@ -14,3 +14,6 @@ streamlit-extras>=0.2.4
 streamlit-extras
 emoji-country-flag
 st_pages
+pycountry
+streamlit_extras
+json
