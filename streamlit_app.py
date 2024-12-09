@@ -170,8 +170,8 @@ def compare_with_dataset(scores, dataset_path):
         similarity_df = similarity_df.sort_values(by="similarity", ascending=True)  # Lower distance = more similar
 
         # DROPDOWN FOR PERSONALITY TRAIT
-        st.markdown("<h3 style='text-align: center;'>Explore Countries by Personality Traits</h3>", unsafe_allow_html=True)
-        trait = st.selectbox("Select a personality trait to explore the top 5 similar countries:", ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism", "Combined"])
+        #st.markdown("<h3 style='text-align: center;'>Explore Countries by Personality Traits</h3>", unsafe_allow_html=True)
+        trait = st.selectbox("Select a personality trait to explore the top 5 similar countries:", ["Combined","Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"])
 
         # Create a centered container for tables
         row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.columns(
@@ -286,10 +286,11 @@ def main():
              To excel as a negotiator, especially in an increasingly globalized world, one must embrace the diversity of cultural norms and personality traits. As Erin Meyer highlights in <em>Getting to Sí, Ja, Oui, Hai, and Da</em> what drives a deal forward in one culture can derail it in another​. For instance, while open disagreement is seen as a constructive dialogue in cultures like Germany or Israel, it may shut down discussions in Mexico or Japan. Similarly, building trust may involve professional competency in the U.S. but require deep personal relationships in China​. 
              
              Understanding and adapting to these nuances enables negotiators to decode subtle signals and avoid miscommunication. Whether it’s gauging emotional expressiveness, tailoring communication to the right level of formality, or recognizing when “yes” means “maybe,” being culturally attuned is essential to fostering trust and mutual understanding​. By broadening your perspective and honing your cultural intelligence, you pave the way for more successful outcomes and lasting partnerships.
+             
+             This tool leverages data analytics and a CustomGPT to dynamically provide you personality results, contextualized against how they align with that of generalized results from other countries. 
              </div>
              """, unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>Getting to Si, Ja, Oui, Hai, and Da, HBR <a href='https://hbr.org/2015/12/getting-to-si-ja-oui-hai-and-da' target='_blank'>our resource page</a>.</p>",unsafe_allow_html=True)
-    
+
     # Render the sidebar and get the user's navigation choice
     with st.sidebar:
         st.title("🥧 Culture Pie")
@@ -307,6 +308,16 @@ def main():
         st.subheader("Data Set")
         st.markdown("""
         - [The EcoCultural Dataset, OSF](https://osf.io/r9msf/)
+        """)
+        st.markdown(
+            """["The Geographic Distribution of Big Five Personality Traits"](https://www.researchgate.net/publication/260244540_The_Geographic_Distribution_of_Big_Five_Personality_Traits_Patterns_and_Profiles_of_Human_Self-Description_Across_56_Nations) is part of the International Sexuality Description Project (ISDP) and collected data on the Big Five personality traits using the 44-item Big Five Inventory (BFI). The data set spans responses from 17,837 participants across 56 nations, representing 10 geographic world regions, 29 languages, and six continents. Most samples were composed of college students, with some community-based participants, and were convenience samples."""
+        )
+        st.markdown("""
+        Key features of the data collection:
+        - Translations: The BFI was translated into 28 languages using translation and back-translation methods to ensure cultural and linguistic appropriateness.
+        - Sampling: Participants were mainly volunteers, with some receiving incentives or course credit.
+        - Methodology: The study utilized self-reported measures with a high return rate among college students (~95%) but lower among community samples (~50%).
+
         """)
 
     # Initialize session state variables
@@ -368,19 +379,20 @@ def main():
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    with st.expander("Read more about Big Five Traits", expanded=True):
+    with st.expander("Read more about Big Five Traits", expanded=False):
             st.markdown("##### Big Five Traits")
-            st.markdown("<h4 style='text-align: center;'>Agreeableness</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>🙂‍↕️ Agreeableness</h4>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center;'>Agreeableness is a measure of courteousness, flexibility, sympathy, trust, cooperation, and tolerance. Agreeable people are kind, warm, altruistic, and tend to be both trusting and trustworthy. They value relationships and avoid conflict. Research has found that agreeable individuals have greater motivation to achieve interpersonal intimacy, which should lead to less assertive tactics in a negotiation setting. Their tendency to be trusting and cooperative might prove constructive. It could even promote the positive negotiation processes needed to achieve economic joint gain. But that success may come at the expense of individual economic outcomes in the face of a competitive counterpart. Higher levels of agreeableness have been found to be associated with a greater susceptibility to anchoring. And for sellers (but not buyers), agreeableness is associated with lower gains (even controlling for anchoring effects).</p>", unsafe_allow_html=True)
-            st.markdown("<h4 style='text-align: center;'>Extraversion</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>🥳 Extraversion</h4>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center;'>Extraversion represents the tendency to be sociable, dominant, assertive, gregarious, confident, and positive (Costa & McCrae, 1992; Watson & Clark, 1997). Extraverts tend to have more friends and spend more time in social situations than do introverts. Because of their sociable nature such individuals may disclose more information about their own preferences and alternatives to agreement during a negotiation. That tendency could be disadvantageous in a highly competitive context. But these same sociable traits may be an asset for integrative bargaining that requires more communication and social interaction to reveal hidden trade-offs and compatibilities (Barry & Friedman,1998). Even so, the assertiveness sub-component could help negotiators stand their ground (Elfenbein, Curhan, Eisenkraft, Shirako, & Brown, 2010). By contrast, the anxiety that introverts feel during social encounters may lead them to make concessions that enable exit from the situation. Finally, extraversion could facilitate the rapport building needed to establish subjective value for both the self and counterpart, although note that extraversion increases one’s susceptibility to anchoring effects.</p>", unsafe_allow_html=True)
 
-            st.markdown("<h4 style='text-align: center;'>Conscientiousness</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>🥹 Conscientiousness</h4>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center;'>Conscientiousness is a measure of self-discipline, indicating that individuals are well organized, careful, responsible, and motivated to achieve (Costa & McCrae, 1992; John & Srivastava, 1999). Of the five fundamental personality traits captured by the TIPI, conscientiousness is the best predictor of overall job performance across a wide array of occupations (Barrick & Mount, 1991). Conscientious negotiators may outperform their less conscientious peers, given their generally greater task achievement and thorough preparation for complex tasks. Furthermore, highly conscientious individuals may facilitate an overall negotiation experience that stays focused on the task instead of personal rancor.</p>", unsafe_allow_html=True)
-            st.markdown("<h4 style='text-align: center;'>Openness</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>🤗 Openness</h4>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center;'>Openness is a measure of imaginativeness, broad-mindedness, and divergent thinking, describing people who are intellectually curious, creative, resourceful, and willing to consider unconventional ideas (Costa & McCrae,1992; John & Srivastava, 1999). Highly open negotiators might approach the unstructured task with greater flexibility and willingness to pursue creative strategies towards more integrative deals (Barry & Friedman, 1998). Open negotiators might be less prone to the ‘‘fixed pie bias,’’ whereby individuals assume that their own and their counterpart’s preferences are diametrically opposed. Their greater flexibility and divergent thinking could help open negotiators to craft better deals for themselves and others. </p>", unsafe_allow_html=True)            
-            st.markdown("<h4 style='text-align: center;'>Neuroticism</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>🫨 Neuroticism</h4>", unsafe_allow_html=True)
             st.markdown("<p style='text-align: center;'>Neuroticism, the inverse of emotional stability, refers to a general level of anxiety, depression, worry, and insecurity (Costa & McCrae,1992; John & Srivastava, 1999). It involves a greater tendency to experience negative affect such as fear, sadness, guilt, and anger. Neurotics are more anxious, moody, prone to emotional distress, and more sensitive to negative stimuli, such as the stimuli involved with the uncertain process of negotiating. Neurotic negotiators may struggle to engage fully with the task and their relationship partners, likely resulting in less optimal economic and psychological outcomes.</p>", unsafe_allow_html=True) 
+    
 
     if st.session_state.test_submitted:
         # Flatten responses for scoring
@@ -388,19 +400,50 @@ def main():
         # Step 2: Calculate Scores
         scores = calculate_big_five_scores(flattened_responses)
 
+        advice = get_negotiation_advice(scores)
+        st.write(advice)
+        st.write("***Here is your personalized negotiation recommendations based on your Big Five personality test results. The results are generated by a customGPT AI bot built upon the OpenAI LLM platform****")
+
         # Step 3: Compare with Dataset
         st.markdown("<h2 style='text-align: center;'>How your Traits Translate", unsafe_allow_html=True)
         dataset_path = "/workspaces/chatbot/data/global_bigfive_data.csv"  # Replace with your actual dataset path
         compare_with_dataset(scores, dataset_path)
 
-        # Step 4: Get Negotiation Advice
-        st.markdown("<h3 style='text-align: center;'>Negotiations Advice for your Personality", unsafe_allow_html=True)
-        if st.button("Generate Advice"):
-            st.session_state.advice_generated = True
-
-        if st.session_state.advice_generated:
-            advice = get_negotiation_advice(scores)
-            st.write(advice)
-
+    with st.expander("Find Tactics & Strategies to match your Personality & Context", expanded=False):
+     
+            st.markdown("<h4 style='text-align: center;'>Responsiveness</h4>", unsafe_allow_html=True)
+            st.markdown("""is a powerful tactic in negotiations that involves demonstrating attentiveness and support to the other party's needs, concerns, and emotions. This approach can significantly enhance the negotiation process by building trust, fostering positive relationships, and creating a more collaborative atmosphere. Responsiveness consists of three key elements:""")
+            st.markdown("""
+                            - **Care** component of responsiveness involves demonstrating genuine concern for the other party's well-being and interests. This can be expressed through: empathy and emotional support, willingness to accommodate the other party's needs when possible, commitment to finding mutually beneficial solutions. 
+                            - **Validation** involves acknowledging and accepting the other party's experiences, emotions, and viewpoints as legitimate and worthy of consideration. This element of responsiveness includes: recognizing the validity of the other party's perspective, showing appreciation for their abilities and traits, and respecting their worldview, even if it differs from your own. 
+                            - **Understanding** in responsiveness refers to accurately perceiving and comprehending the other party's perspective, including their: core values and beliefs, immediate thoughts and feelings, and underlying needs and interests. 
+                            """)
+            
+            st.markdown("<h4 style='text-align: center;'>Distancing Yourself</h4>", unsafe_allow_html=True)
+            st.markdown("""***Distance Yourself*** tactics in negotiations are strategies used to gain perspective and maintain emotional control during challenging discussions. These techniques help negotiators step back from the immediate situation, allowing for more objective analysis and decision-making. These distancing tactics share a common goal: to help negotiators maintain composure, think more clearly, and make better decisions during challenging conversations. By creating psychological distance, negotiators can avoid reactive responses, consider multiple perspectives, and focus on long-term objectives rather than getting caught up in the heat of the moment. Here are three specific tactics:""")
+            st.markdown("""
+                            - **Fly on the Wall**: The "fly on the wall" technique involves observing a situation as an unobtrusive, neutral party without interfering or influencing the events. This technique allows negotiators to gain a more impartial view of the situation, potentially revealing insights that might be missed when deeply engaged in the discussion. 
+                            - **Peering Down from a Balcony**: The "balcony strategy," popularized by William Ury, involves mentally stepping back from the negotiation, as if observing it from a balcony. 
+                            - **Refer to Self in Third Person**: is another distancing tactic that can be effective in negotiations. 
+                            """)
+            
+            st.markdown("<h4 style='text-align: center;'>Strategic Display</h4>", unsafe_allow_html=True)
+            st.markdown("""is a tactic used in negotiations to intentionally convey specific information, emotions, or behaviors to influence the other party's perceptions and decisions. This approach involves carefully crafting one's presentation and communication to achieve desired outcomes in the negotiation process. Strategic display, when used effectively, can be a powerful tool in shaping the negotiation environment and influencing outcomes. However, it's important to use this tactic ethically and in conjunction with other negotiation strategies for optimal results. The Key Elements are:
+                        """)
+            st.markdown("""
+                            - **Controlled Information Sharing**: Selectively revealing or withholding information to shape the other party's understanding of the situation.
+                            - **Emotional Management**: Deliberately expressing or suppressing emotions to elicit specific responses from counterparts.
+                            - **Behavioral Positioning**: Adopting particular behaviors or stances to project strength, flexibility, or other desired qualities.
+                            """)
+            st.markdown("<h4 style='text-align: center;'>Self-disclosure:</h4>", unsafe_allow_html=True)
+            st.markdown("""is a strategic tactic in negotiations that involves intentionally sharing personal information, thoughts, or feelings with the other party. When used effectively, it can significantly impact the negotiation process and outcomes. Benefits of Self-Disclosure in Negotiations:""")
+            st.markdown("""
+                 - Building Trust and Rapport
+                 - Emotional Regulation
+                 - Information Exchange
+                 """)
+            
+            st.markdown("<h4 style='text-align: center;'>And of course,</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>grow the 🥧 and 🔪 the pie! Thanks Professor Cooney!</h4>", unsafe_allow_html=True)
 if __name__ == "__main__":
     main()
