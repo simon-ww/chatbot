@@ -13,7 +13,9 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 # Set up OpenAI API key
 openai.api_key = st.secrets["secrets"]["OPENAI_API_KEY"]
 
-st.set_page_config(page_title="Big Five", layout="wide")
+st.set_page_config(page_title="Culture Pie",
+                   page_icon="🥧",
+                   layout="wide")
 
 def calculate_big_five_scores(responses):
     """Calculate Big Five scores based on user responses."""
@@ -193,7 +195,7 @@ def compare_with_dataset(scores, dataset_path):
 
         with row0_2:
             st.markdown(
-                f"<div style='text-align: center;'>{cultural_analysis}</div>",
+                f"<div style='text-align: center;'><br/><br/><br/><br/>{cultural_analysis}<br/><br/><br/><br/></div>",
                 unsafe_allow_html=True
             )
 
@@ -212,7 +214,7 @@ def compare_with_dataset(scores, dataset_path):
              add_vertical_space()
         with row0_4:
             st.markdown(
-                f"<div style='text-align: center;'>{cultural_disimilar}</div>",
+                f"<div style='text-align: center;'><br/><br/><br/><br/>{cultural_disimilar}<br/><br/><br/><br/></div>",
                 unsafe_allow_html=True
             )
 
@@ -406,6 +408,7 @@ def main():
 
         # Step 3: Compare with Dataset
         st.markdown("<h2 style='text-align: center;'>How your Traits Translate", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>The methodology of T-scores were to compare results between countries, it involves standardizing raw personality trait scores across nations to make them directly comparable.</p>", unsafe_allow_html=True)
         dataset_path = "data/global_bigfive_data.csv"  # Replace with your actual dataset path
         compare_with_dataset(scores, dataset_path)
 
