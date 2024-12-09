@@ -177,7 +177,7 @@ def compare_with_dataset(scores, dataset_path):
 
         # Create a centered container for tables
         row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.columns(
-        (0.1, 1, 0.2, 4, 0.1)
+        (0.1, 4, 0.2, 1, 0.1)
 )
         # Generate cultural analysis of the most similar country
         with row0_1:
@@ -185,43 +185,46 @@ def compare_with_dataset(scores, dataset_path):
                 f"<h3 style='text-align: center;'>You're most like {similarity_df.loc[similarity_df['similarity'].idxmin(), 'country']} {flag(similarity_df.loc[similarity_df['similarity'].idxmin(), 'country_code'])}</h3>",
                 unsafe_allow_html=True
             )
-            st.markdown("<p style='text-align: center;'>5 Most Similar Countries:</p>", unsafe_allow_html=True)
-            
-        with row0_1: 
-            render_country_table(similarity_df.head(5))
+        with row0_1:
             cultural_analysis = generate_country_analysis(similarity_df)
+            st.markdown(
+                f"<div style='text-align: center;'><br/><br/>{cultural_analysis}<br/><br/></div>",
+                unsafe_allow_html=True
+            )            
+        with row0_2: 
+            st.markdown("<p style='text-align: center;'>5 Most Similar Countries:</p>", unsafe_allow_html=True)
+            render_country_table(similarity_df.head(5))
         with row0_2:
              add_vertical_space()
 
-        with row0_2:
-            st.markdown(
-                f"<div style='text-align: center;'><br/><br/><br/><br/>{cultural_analysis}<br/><br/><br/><br/></div>",
-                unsafe_allow_html=True
-            )
+
 
         row0_spacer3, row0_3, row0_spacer4, row0_4, row0_spacer5 = st.columns(
-        (0.1, 1, 0.2, 4, 0.1)
+        (0.1, 4, 0.2, 1, 0.1)
 )
         with row0_3:
             st.markdown(
-                f"<h2 style='text-align: center;'>You're least like {similarity_df.loc[similarity_df['similarity'].idxmax(), 'country']} {flag(similarity_df.loc[similarity_df['similarity'].idxmax(), 'country_code'])}</h2>",
+                f"<h3 style='text-align: center;'>You're least like {similarity_df.loc[similarity_df['similarity'].idxmax(), 'country']} {flag(similarity_df.loc[similarity_df['similarity'].idxmax(), 'country_code'])}</h3>",
                 unsafe_allow_html=True
             )
+        with row0_3:
+            cultural_disimilar = generate_disimilar(similarity_df)
+            st.markdown(
+                f"<div style='text-align: center;'><br/><br/>{cultural_disimilar}<br/><br/></div>",
+                unsafe_allow_html=True
+            )
+        with row0_4:            
             st.markdown("<p style='text-align: center;'>5 Least Similar Countries:</p>", unsafe_allow_html=True)
             render_country_table(similarity_df.tail(5))
-            cultural_disimilar = generate_disimilar(similarity_df)
         with row0_4:
              add_vertical_space()
-        with row0_4:
-            st.markdown(
-                f"<div style='text-align: center;'><br/><br/><br/><br/>{cultural_disimilar}<br/><br/><br/><br/></div>",
-                unsafe_allow_html=True
-            )
+
 
         # Create the map visualization
         spacer4, col3, spacer5 = st.columns([1, 6, 1])
         with col3:
             st.markdown("<h3 style='text-align: center;'>Explore the Rest of the World</h3>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Using data on composite Big 5 personality scores across countries, you're ranked in terms of similarity across countries. Navigate the map to understand your score in comparison to other countries!</p>", unsafe_allow_html=True)
             render_similarity_map(similarity_df)
 
     except FileNotFoundError:
@@ -279,8 +282,8 @@ def generate_disimilar(similarity_df):
 #################### Streamlit App ######################
 #########################################################
 def main():
-    st.markdown("<h1 style='text-align: center;; color: #E7AB79;'>🥧 The Pie's not Always <em>Apple</em></h1>", unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: center; font-size: 18px;'>Want to take your newly minted negotiations skills global?</h4>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;; color: #6246ea;'>The Pie's not Always <em>Apple</em></h1>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; font-size: 18px; color: #d1d1e9;'>Want to take your newly minted negotiations skills global?</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center;'>Try this tool to understand how your personality helps (or hurts) in cross-culture negotiations.</p>", unsafe_allow_html=True)
     st.markdown(
              """ 
@@ -290,9 +293,9 @@ def main():
              Understanding and adapting to these nuances enables negotiators to decode subtle signals and avoid miscommunication. Whether it’s gauging emotional expressiveness, tailoring communication to the right level of formality, or recognizing when “yes” means “maybe,” being culturally attuned is essential to fostering trust and mutual understanding​. By broadening your perspective and honing your cultural intelligence, you pave the way for more successful outcomes and lasting partnerships.
              </div>
              """, unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: center; font-size: 18px;'>What you'll get out of Culture Pie</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; font-size: 18px; color: #d1d1e9;'>What you'll get out of Culture Pie</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center;'>This tool leverages data analytics and a CustomGPT to dynamically provide you personality results, contextualized against how they align with that of generalized results from other countries.</p>", unsafe_allow_html=True) 
-    st.markdown("<h4 style='text-align: center; font-size: 18px;'>The Features:</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; font-size: 18px;color: #d1d1e9;'>The Features:</h4>", unsafe_allow_html=True)
     st.markdown(
              """ 
              <div style='text-align: center;'>
@@ -307,27 +310,32 @@ def main():
              """, unsafe_allow_html=True)
     # Render the sidebar and get the user's navigation choice
     with st.sidebar:
-        st.markdown('<span style="font-size: 50px;">🥧</span>', unsafe_allow_html=True)
+        #st.markdown('<span style="font-size: 50px;">🥧</span>', unsafe_allow_html=True)
+        st.image("icon_pie.png", caption=None, width=100)
         st.title("**Culture Pie**")
         st.subheader("Negotiations - Fall 2024")
-        st.markdown("<p style='text-align: center;'>Simon Chen WG'26 <a href='simoncn@wharton.upenn.edu' target='_blank'>simoncn@wharton.upenn.edu</a>.</p>",unsafe_allow_html=True)        
+        st.markdown("<p style='text-align: left;'>Simon Chen WG'26 <a href='simoncn@wharton.upenn.edu' target='_blank'>simoncn@wharton.upenn.edu</a>.</p>",unsafe_allow_html=True)        
+        st.image("icon_info.png", caption=None, width=30)
         st.markdown(
-            """ℹ️ Culture pie is a tool built for exploring the nusances created by the intersection of personality and culture when people of different backgrounds come to the table to negotiate."""
+            """Culture pie is a tool built for exploring the nusances created by the intersection of personality and culture when people of different backgrounds come to the table to negotiate."""
         )    
         with st.expander("**About the Course**", expanded=True):
+            st.image("icon_course.png", caption=None, width=30)
             st.markdown("""
             This app was built as a final project for [MGMT/OIDD/LGST 8060](https://apps.wharton.upenn.edu/syllabi/?term=202430&course=LGST8060402) at Wharton, taught by Professor Gus Cooney. 
             """)
-            st.image("wharton_logo.png", caption=None, width=150)
+            st.image("wharton_logo.png", caption=None, width=120)
         with st.expander("**Works Cited**", expanded=True):
-            st.subheader("**📚 Works Cited**")
+            st.image("icon_book.png", caption=None, width=30)
+            #st.subheader("**Works Cited**")
             st.markdown("""
             - [IPIP, Big Five Personality Test](https://ipip.ori.org/)
             - [Meyer, Erin. “Getting to Sí, Ja, Oui, Hai, and Da.” Harvard Business Review, Dec. 2015](https://hbr.org/2015/12/getting-to-si-ja-oui-hai-and-da)
             - Fisher, Roger, and William Ury. Getting to Yes: Negotiating Agreement Without Giving In
             """)
         with st.expander("**About the Data Set**", expanded=True):
-            st.subheader("**📊 Data Set**")
+            st.image("icon_bar.png", caption=None, width=30)
+            #st.subheader("**Data Set**")
             st.markdown("""
             - [The EcoCultural Dataset, OSF](https://osf.io/r9msf/)
             """)
