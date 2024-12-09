@@ -7,6 +7,8 @@ import plotly.express as px
 import pycountry
 import json
 from questions import questions
+from sidebar import render_sidebar
+from streamlit_extras.add_vertical_space import add_vertical_space
 
 # Set up OpenAI API key
 openai.api_key = st.secrets["secrets"]["OPENAI_API_KEY"]
@@ -55,7 +57,7 @@ def get_negotiation_advice(scores):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": "You are a negotiations coach that provides advice on how personality traits and cultural background impacts negotiation tactics and strategies"},
                 {"role": "user", "content": prompt}
             ]
         )
@@ -64,9 +66,8 @@ def get_negotiation_advice(scores):
         st.error(f"An error occurred while fetching negotiation advice: {e}")
         return "Unable to generate advice due to an error."
 
-def render_country_table(df, title):
+def render_country_table(df):
     """Render a country table with emoji flags."""
-    st.markdown(f"### {title}")
     table_html = "<table>"
     table_html += "<tr><th>Country</th><th>Similarity</th><th>Flag</th></tr>"
     for _, row in df.iterrows():
@@ -82,7 +83,6 @@ def render_country_table(df, title):
 
 def render_similarity_map(similarity_df):
     """Render a choropleth map based on similarity scores."""
-    st.subheader("Global Similarity Map")
 
     # Load GeoJSON file 
     with open("countries.geo.json", "r") as geojson_file:
@@ -101,30 +101,29 @@ def render_similarity_map(similarity_df):
         hover_name="country",
         hover_data=["Similarity"],
         color_continuous_scale="Viridis",
-        title="Similarity of Countries Based on Big Five Traits"
     )
     fig.update_geos(
         showcoastlines=True,
-        coastlinecolor="gray",  # Coastline color for contrast
+        coastlinecolor="#e5e5e5",  # Coastline color for contrast
         showland=True,
-        landcolor="black",  # Land color
+        landcolor="#252323",  # Land color
         showocean=True,
-        oceancolor="black",  # Ocean color
+        oceancolor="#0e1117",  # Ocean color
         fitbounds="locations"
     )
     fig.update_layout(
         autosize=False,
-        paper_bgcolor="black",  # Background color
-        plot_bgcolor="black",  # Plot area background color
+        paper_bgcolor="#0e1117",  # Background color
+        plot_bgcolor="#0e1117",  # Plot area background color
         font_color="white",  # Font color for text
-        margin=dict(l=20, r=20, t=50, b=20),
+        margin=dict(l=10, r=10, t=1, b=1),
         coloraxis_colorbar={
             "title": "Similarity",
             "tickfont": {"color": "white"},  # Tick font color
             "titlefont": {"color": "white"}  # Title font color
         }
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True) ## CREATE MAP GRAPH
 
 # Inside compare_with_dataset function
 def compare_with_dataset(scores, dataset_path):
@@ -170,18 +169,58 @@ def compare_with_dataset(scores, dataset_path):
         similarity_df = pd.DataFrame(similarities)
         similarity_df = similarity_df.sort_values(by="similarity", ascending=True)  # Lower distance = more similar
 
-        # Create the map visualization
-        render_similarity_map(similarity_df)
+        # DROPDOWN FOR PERSONALITY TRAIT
+        st.markdown("<h3 style='text-align: center;'>Explore Countries by Personality Traits</h3>", unsafe_allow_html=True)
+        trait = st.selectbox("Select a personality trait to explore the top 5 similar countries:", ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism", "Combined"])
 
         # Create a centered container for tables
-        with st.container():
-            col1, col2 = st.columns((0.1, 0.1))
+        row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.columns(
+        (0.1, 1, 0.2, 4, 0.1)
+)
+        # Generate cultural analysis of the most similar country
+        with row0_1:
+            st.markdown(
+                f"<h3 style='text-align: center;'>You're most like {similarity_df.loc[similarity_df['similarity'].idxmin(), 'country']} {flag(similarity_df.loc[similarity_df['similarity'].idxmin(), 'country_code'])}</h3>",
+                unsafe_allow_html=True
+            )
+            st.markdown("<p style='text-align: center;'>5 Most Similar Countries:</p>", unsafe_allow_html=True)
+            
+        with row0_1: 
+            render_country_table(similarity_df.head(5))
+            cultural_analysis = generate_country_analysis(similarity_df)
+        with row0_2:
+             add_vertical_space()
 
-            with col1:
-                render_country_table(similarity_df.head(5), "Top 5 Most Similar Countries")
+        with row0_2:
+            st.markdown(
+                f"<div style='text-align: center;'>{cultural_analysis}</div>",
+                unsafe_allow_html=True
+            )
 
-            with col2:
-                render_country_table(similarity_df.tail(5), "Top 5 Least Similar Countries")
+        row0_spacer3, row0_3, row0_spacer4, row0_4, row0_spacer5 = st.columns(
+        (0.1, 1, 0.2, 4, 0.1)
+)
+        with row0_3:
+            st.markdown(
+                f"<h2 style='text-align: center;'>You're least like {similarity_df.loc[similarity_df['similarity'].idxmax(), 'country']} {flag(similarity_df.loc[similarity_df['similarity'].idxmax(), 'country_code'])}</h2>",
+                unsafe_allow_html=True
+            )
+            st.markdown("<p style='text-align: center;'>5 Least Similar Countries:</p>", unsafe_allow_html=True)
+            render_country_table(similarity_df.tail(5))
+            cultural_disimilar = generate_disimilar(similarity_df)
+        with row0_4:
+             add_vertical_space()
+        with row0_4:
+            st.markdown(
+                f"<div style='text-align: center;'>{cultural_disimilar}</div>",
+                unsafe_allow_html=True
+            )
+
+        # Create the map visualization
+        spacer4, col3, spacer5 = st.columns([1, 6, 1])
+        with col3:
+            st.markdown("<h3 style='text-align: center;'>Explore the Rest of the World</h3>", unsafe_allow_html=True)
+            render_similarity_map(similarity_df)
 
     except FileNotFoundError:
         st.error(f"Dataset not found at {dataset_path}. Please upload the correct file.")
@@ -190,9 +229,85 @@ def compare_with_dataset(scores, dataset_path):
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
 
-# Streamlit App
+# MOST SIMILAR COUNTRY
+def generate_country_analysis(similarity_df):
+    """Analyze negotiation cultural norms for the most similar country."""
+    # Find the most similar country
+    most_similar_country = similarity_df.loc[similarity_df['similarity'].idxmin()]
+    most_country = most_similar_country['country']
+    prompt = f"""
+    Provide a short blurb less than 150 words that very briefly summarizes negotiation cultural norms specific to {most_country}, as well as one very interesting fact about negotiation or communication norms/styles there.
+    """
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a negotiations coach that provides advice on how personality traits and cultural background impacts negotiation tactics and strategies."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        st.error(f"An error occurred while generating cultural analysis: {e}")
+        return "Unable to generate cultural analysis at this time."
+
+# LEAST SIMILAR COUNTRY
+def generate_disimilar(similarity_df):
+    """Analyze negotiation cultural norms for the least similar country."""
+    # Find the LEAST similar country
+    least_similar_country = similarity_df.loc[similarity_df['similarity'].idxmax()]
+    least_country = least_similar_country['country']
+    prompt = f"""
+    Provide a short blurb less than 150 words that very briefly summarizes negotiation cultural norms specific to {least_country}, as well as one very interesting fact about negotiation or communication norms/styles there
+    """
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a negotiations coach that provides advice on how personality traits and cultural background impacts negotiation tactics and strategies."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        st.error(f"An error occurred while generating cultural analysis: {e}")
+        return "Unable to generate cultural analysis at this time."
+
+#########################################################
+#################### Streamlit App ######################
+#########################################################
 def main():
-    st.title("Big Five Personality Test & Negotiation Advisor")
+    st.markdown("<h1 style='text-align: center;'>🥧 The Pie's not always Apple</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Want to take your newly minted negotiations skills global?</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Try this tool to understand how your personality helps (or hurts) in cross-culture negotiations.</p>", unsafe_allow_html=True)
+    st.markdown(
+             """ 
+             <div style='text-align: center;'>
+             To excel as a negotiator, especially in an increasingly globalized world, one must embrace the diversity of cultural norms and personality traits. As Erin Meyer highlights in <em>Getting to Sí, Ja, Oui, Hai, and Da</em> what drives a deal forward in one culture can derail it in another​. For instance, while open disagreement is seen as a constructive dialogue in cultures like Germany or Israel, it may shut down discussions in Mexico or Japan. Similarly, building trust may involve professional competency in the U.S. but require deep personal relationships in China​. 
+             
+             Understanding and adapting to these nuances enables negotiators to decode subtle signals and avoid miscommunication. Whether it’s gauging emotional expressiveness, tailoring communication to the right level of formality, or recognizing when “yes” means “maybe,” being culturally attuned is essential to fostering trust and mutual understanding​. By broadening your perspective and honing your cultural intelligence, you pave the way for more successful outcomes and lasting partnerships.
+             </div>
+             """, unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Getting to Si, Ja, Oui, Hai, and Da, HBR <a href='https://hbr.org/2015/12/getting-to-si-ja-oui-hai-and-da' target='_blank'>our resource page</a>.</p>",unsafe_allow_html=True)
+    
+    # Render the sidebar and get the user's navigation choice
+    with st.sidebar:
+        st.title("🥧 Culture Pie")
+        st.subheader("Negotiations - Fall 2024")
+        st.markdown(
+            """Culture pie is a tool built for exploring the nusances created by the intersection of personality and culture when people of different backgrounds come to the table to negotiate."""
+        )
+        st.markdown("<p style='text-align: center;'>Simon Chen WG'26 <a href='simoncn@wharton.upenn.edu' target='_blank'>simoncn@wharton.upenn.edu</a>.</p>",unsafe_allow_html=True)
+        st.subheader("Works Cited")
+        st.markdown("""
+        - [IPIP, Big Five Personality Test](https://ipip.ori.org/)
+        - [Meyer, Erin. “Getting to Sí, Ja, Oui, Hai, and Da.” Harvard Business Review, Dec. 2015](https://hbr.org/2015/12/getting-to-si-ja-oui-hai-and-da)
+        - Fisher, Roger, and William Ury. Getting to Yes: Negotiating Agreement Without Giving In
+        """)
+        st.subheader("Data Set")
+        st.markdown("""
+        - [The EcoCultural Dataset, OSF](https://osf.io/r9msf/)
+        """)
 
     # Initialize session state variables
     if "test_submitted" not in st.session_state:
@@ -201,13 +316,13 @@ def main():
         st.session_state.advice_generated = False
 
     # Step 1: Big Five Questionnaire
-    with st.expander("Step 1: Take the Personality Test", expanded=True):
+    with st.expander("First - a few questions to get to know you", expanded=True):
         responses = {}
-
+        
         # Display questions with sliders grouped by trait
         for trait, trait_questions in questions.items():
-            st.subheader(trait)
-            st.caption("Rate on a scale of 1 (Strongly Disagree) to 5 (Strongly Agree).")
+            #st.subheader(trait)
+            st.caption("Here are a number of characteristics that may or may not apply to you. For example, do you agree that you are someone who likes to spend time with others? Please write a number next to each statement to indicate the extent to which you agree or disagree with that statement. Rate on a scale of 1 (Strongly Disagree) to 5 (Strongly Agree).")
             responses[trait] = []
             for question in trait_questions:
                 response = st.slider(question, 1, 5, 3, key=f"{trait}_{question}")
@@ -224,13 +339,18 @@ def main():
 
         # Step 2: Calculate Scores
         scores = calculate_big_five_scores(flattened_responses)
-        st.subheader("Your Personality Profile")
+        st.markdown("<h2 style='text-align: center;'>Your Big Five Personality Results", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>The “Big Five” are five broad dimensions meant to capture the range of human personality. Think of them like those quizzes on Buzzfeed that promise to tell you “what type of person you are,” but this is actually real. It’s the best, most rigorous way scientists have come up with to capture the variance in human personality.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>One should be very wary of using canned “norms” because it isn’t obvious that one could ever find a population of which one’s present sample is a representative subset. Most “norms” are misleading, and therefore they should not be used.</p>", unsafe_allow_html=True)
+        st.markdown(
+            "<p style='text-align: center;'>More on Norms from IPIP <a href='https://ipip.ori.org/newNorms.htm' target='_blank'>our resource page</a>.</p>",
+            unsafe_allow_html=True
+        )
 
         # Create a bar graph with distinct colors for each bar
         traits = list(scores.keys())
         values = list(scores.values())
         colors = ["#C2185B", "#7C4DFF", "#536DFE", "#00BCD4", "#64FFDA"]  # Example color palette
-
         fig = px.bar(
             x=traits,
             y=values,
@@ -239,7 +359,6 @@ def main():
             color=traits,  # Add a color dimension
             color_discrete_sequence=colors  # Assign custom colors
         )
-
         fig.update_layout(
             xaxis_title="Traits",
             yaxis_title="Score",
@@ -248,16 +367,34 @@ def main():
             font_color="white"
         )
         st.plotly_chart(fig, use_container_width=True)
-        extraversion_score = scores["Extraversion"]
-        st.markdown(f"**You scored {extraversion_score:.2f} on the Extraversion scale.**")
+
+    with st.expander("Read more about Big Five Traits", expanded=True):
+            st.markdown("##### Big Five Traits")
+            st.markdown("<h4 style='text-align: center;'>Agreeableness</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Agreeableness is a measure of courteousness, flexibility, sympathy, trust, cooperation, and tolerance. Agreeable people are kind, warm, altruistic, and tend to be both trusting and trustworthy. They value relationships and avoid conflict. Research has found that agreeable individuals have greater motivation to achieve interpersonal intimacy, which should lead to less assertive tactics in a negotiation setting. Their tendency to be trusting and cooperative might prove constructive. It could even promote the positive negotiation processes needed to achieve economic joint gain. But that success may come at the expense of individual economic outcomes in the face of a competitive counterpart. Higher levels of agreeableness have been found to be associated with a greater susceptibility to anchoring. And for sellers (but not buyers), agreeableness is associated with lower gains (even controlling for anchoring effects).</p>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Extraversion</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Extraversion represents the tendency to be sociable, dominant, assertive, gregarious, confident, and positive (Costa & McCrae, 1992; Watson & Clark, 1997). Extraverts tend to have more friends and spend more time in social situations than do introverts. Because of their sociable nature such individuals may disclose more information about their own preferences and alternatives to agreement during a negotiation. That tendency could be disadvantageous in a highly competitive context. But these same sociable traits may be an asset for integrative bargaining that requires more communication and social interaction to reveal hidden trade-offs and compatibilities (Barry & Friedman,1998). Even so, the assertiveness sub-component could help negotiators stand their ground (Elfenbein, Curhan, Eisenkraft, Shirako, & Brown, 2010). By contrast, the anxiety that introverts feel during social encounters may lead them to make concessions that enable exit from the situation. Finally, extraversion could facilitate the rapport building needed to establish subjective value for both the self and counterpart, although note that extraversion increases one’s susceptibility to anchoring effects.</p>", unsafe_allow_html=True)
+
+            st.markdown("<h4 style='text-align: center;'>Conscientiousness</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Conscientiousness is a measure of self-discipline, indicating that individuals are well organized, careful, responsible, and motivated to achieve (Costa & McCrae, 1992; John & Srivastava, 1999). Of the five fundamental personality traits captured by the TIPI, conscientiousness is the best predictor of overall job performance across a wide array of occupations (Barrick & Mount, 1991). Conscientious negotiators may outperform their less conscientious peers, given their generally greater task achievement and thorough preparation for complex tasks. Furthermore, highly conscientious individuals may facilitate an overall negotiation experience that stays focused on the task instead of personal rancor.</p>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center;'>Openness</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Openness is a measure of imaginativeness, broad-mindedness, and divergent thinking, describing people who are intellectually curious, creative, resourceful, and willing to consider unconventional ideas (Costa & McCrae,1992; John & Srivastava, 1999). Highly open negotiators might approach the unstructured task with greater flexibility and willingness to pursue creative strategies towards more integrative deals (Barry & Friedman, 1998). Open negotiators might be less prone to the ‘‘fixed pie bias,’’ whereby individuals assume that their own and their counterpart’s preferences are diametrically opposed. Their greater flexibility and divergent thinking could help open negotiators to craft better deals for themselves and others. </p>", unsafe_allow_html=True)            
+            st.markdown("<h4 style='text-align: center;'>Neuroticism</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Neuroticism, the inverse of emotional stability, refers to a general level of anxiety, depression, worry, and insecurity (Costa & McCrae,1992; John & Srivastava, 1999). It involves a greater tendency to experience negative affect such as fear, sadness, guilt, and anger. Neurotics are more anxious, moody, prone to emotional distress, and more sensitive to negative stimuli, such as the stimuli involved with the uncertain process of negotiating. Neurotic negotiators may struggle to engage fully with the task and their relationship partners, likely resulting in less optimal economic and psychological outcomes.</p>", unsafe_allow_html=True) 
+
+    if st.session_state.test_submitted:
+        # Flatten responses for scoring
+        flattened_responses = [response for trait_responses in responses.values() for response in trait_responses]
+        # Step 2: Calculate Scores
+        scores = calculate_big_five_scores(flattened_responses)
 
         # Step 3: Compare with Dataset
-        st.header("Step 2: Country Similarities")
+        st.markdown("<h2 style='text-align: center;'>How your Traits Translate", unsafe_allow_html=True)
         dataset_path = "/workspaces/chatbot/data/global_bigfive_data.csv"  # Replace with your actual dataset path
         compare_with_dataset(scores, dataset_path)
 
         # Step 4: Get Negotiation Advice
-        st.header("Step 3: Personalized Negotiation Advice")
+        st.markdown("<h3 style='text-align: center;'>Negotiations Advice for your Personality", unsafe_allow_html=True)
         if st.button("Generate Advice"):
             st.session_state.advice_generated = True
 
