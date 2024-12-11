@@ -1,19 +1,9 @@
-# 💬 Chatbot template
+# culturepie-app
 
-A simple Streamlit app that shows how to build a chatbot using OpenAI's GPT-3.5.
+Prod: https://culturepie.streamlit.app/
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://chatbot-template.streamlit.app/)
+Culture pie is a tool built for exploring the nusances created by the intersection of personality and culture when people of different backgrounds come to the table to negotiate.
 
-### How to run it on your own machine
+## Context
 
-1. Install the requirements
-
-   ```
-   $ pip install -r requirements.txt
-   ```
-
-2. Run the app
-
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+This app was built as a final project for [MGMT/OIDD/LGST 8060] (https://apps.wharton.upenn.edu/syllabi/?term=202430&course=LGST8060402) at Wharton, taught by Professor Gus Cooney.
